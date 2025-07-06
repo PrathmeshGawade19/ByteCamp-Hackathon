@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Authority Dashboard - Civic Saathi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+</head>
+<body>
+
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Welcome, {{ user.username }} <small class="text-muted">(Authority)</small></h2>
+        <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+    </div>
+
+    <div class="alert alert-light shadow-sm">
+        🔴 Open: <span class="badge bg-danger">{{ status_counts.Open }}</span> |
+        🟠 In Progress: <span class="badge bg-warning text-dark">{{ status_counts.In_Progress }}</span> |
+        🟢 Resolved: <span class="badge bg-success">{{ status_counts.Resolved }}</span>
+    </div>
+
+    {% for complaint in complaints %}
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">{{ complaint.category }}</h5>
+            <p class="card-text">{{ complaint.description }}</p>
+            <small class="text-muted">{{ complaint.location_name }}</small><br>
+            <img src="{{ complaint.image.url }}" alt="Complaint Image" class="img-fluid rounded my-3" style="max-width: 400px;">
+
+            <form method="POST" action="{% url 'update_complaint_status' complaint.id %}" class="d-flex align-items-center gap-2">
+                {% csrf_token %}
+                <select name="status" class="form-select w-auto">
+                    <option value="Open" {% if complaint.status == 'Open' %}selected{% endif %}>Open</option>
+                    <option value="In Progress" {% if complaint.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                    <option value="Resolved" {% if complaint.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">Update</button>
+            </form>
+        </div>
+    </div>
+    {% empty %}
+        <p class="text-muted">No complaints found.</p>
+    {% endfor %}
+</div>
+
+</body>
+</html>

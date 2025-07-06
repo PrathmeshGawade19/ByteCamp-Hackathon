@@ -1,0 +1,206 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Civic Saathi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Welcome, {{ user.username }}</h2>
+        <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+    </div>
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs mb-4" id="dashboardTabs">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#trending">Trending Complaints</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#mycomplaints">My Complaints</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#maptab">Complaints Map</a>
+        </li>
+    </ul>
+
+    <!-- Tab content -->
+    <div class="tab-content">
+        <!-- Trending Complaints -->
+        <div class="tab-pane fade show active" id="trending">
+            {% if trending_complaints %}
+                {% for complaint in trending_complaints %}
+                <div class="card mb-4 
+                    {% if complaint.num_upvotes > 10 %} border-danger {% else %} border-primary {% endif %}">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            {{ complaint.category }}
+                            {% if complaint.num_upvotes > 10 %}
+                                <span class="badge bg-danger ms-2">🔥 Trending</span>
+                            {% endif %}
+                        </h5>
+                        <p class="card-text">{{ complaint.description }}</p>
+                        <small class="text-muted">
+                            Filed by {{ complaint.user.username }} on {{ complaint.created_at|date:"d M Y, h:i A" }}
+                        </small><br>
+                        <small class="text-muted">{{ complaint.location_name }}</small><br>
+                        <small class="text-muted">Status: {{ complaint.status }}</small><br>
+                        {% if complaint.image %}
+                            <img src="{{ complaint.image.url }}" alt="Complaint Image" class="complaint-img my-2">
+                        {% endif %}
+
+                        <div class="mt-2">
+                            <a href="{% url 'upvote_complaint' complaint.id %}" class="btn btn-outline-primary btn-sm">
+                                👍 Upvote ({{ complaint.total_upvotes }})
+                            </a>
+                            <span class="badge bg-secondary">{{ complaint.num_comments }} Comments</span>
+                        </div>
+
+                        <!-- Comments -->
+                        <div class="mt-3">
+                            <h6>Latest Comments:</h6>
+                            {% for comment in complaint.latest_comments %}
+                                <div class="comment-box">
+                                    <strong>{{ comment.user.username }}</strong>: {{ comment.text }}
+                                    <div class="text-muted" style="font-size: 0.8em;">
+                                        {{ comment.created_at|date:"d M Y H:i" }}
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="text-muted">No comments yet.</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Comment form -->
+                        <form method="POST" action="{% url 'add_comment' complaint.id %}" class="mt-2">
+                            {% csrf_token %}
+                            <textarea name="text" class="form-control mb-2" rows="2" placeholder="Add a comment..." required></textarea>
+                            <button type="submit" class="btn btn-sm btn-secondary">Post Comment</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No trending complaints at the moment.</p>
+            {% endif %}
+        </div>
+
+        <!-- My Complaints -->
+        <div class="tab-pane fade" id="mycomplaints">
+            <div class="mb-3">
+                <a href="{% url 'file_complaint' %}" class="btn btn-success">File New Complaint</a>
+            </div>
+            {% if my_complaints %}
+                {% for complaint in my_complaints %}
+                <div class="card mb-4 custom-card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ complaint.category }}</h5>
+                        <p class="card-text">{{ complaint.description }}</p>
+                        <small class="text-muted">
+                            Filed by {{ complaint.user.username }} on {{ complaint.created_at|date:"d M Y, h:i A" }}
+                        </small><br>
+                        <small class="text-muted">{{ complaint.location_name }}</small><br>
+                        <small class="text-muted">Status: {{ complaint.status }}</small><br>
+                        {% if complaint.image %}
+                            <img src="{{ complaint.image.url }}" alt="Complaint Image" class="complaint-img my-2">
+                        {% endif %}
+
+
+                        <div class="mt-2">
+                            <a href="{% url 'upvote_complaint' complaint.id %}" class="btn btn-outline-primary btn-sm">
+                                👍 Upvote ({{ complaint.total_upvotes }})
+                            </a>
+                        </div>
+
+                        <div class="mt-3">
+                            <h6>Comments:</h6>
+                            {% for comment in complaint.comments.all %}
+                                <div class="comment-box">
+                                    <strong>{{ comment.user.username }}:</strong> {{ comment.text }}
+                                    <div class="text-muted" style="font-size: 0.8em;">{{ comment.created_at|date:"d M Y H:i" }}</div>
+                                </div>
+                            {% empty %}
+                                <div class="text-muted">No comments yet.</div>
+                            {% endfor %}
+                        </div>
+
+                        <form method="POST" action="{% url 'add_comment' complaint.id %}" class="mt-2">
+                            {% csrf_token %}
+                            <textarea name="text" class="form-control mb-2" rows="2" placeholder="Add a comment..." required></textarea>
+                            <button type="submit" class="btn btn-sm btn-secondary">Post Comment</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">You have not filed any complaints yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- Complaints Map -->
+        <div class="tab-pane fade" id="maptab">
+            <div id="map" style="height: 400px;"></div>
+        </div>
+    </div>
+</div>
+
+<script id="mapComplaintsData" type="application/json">
+    {{ map_complaints_json|safe }}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    var mapTab = document.querySelector('a[href="#maptab"]');
+    var mapInstance = null;
+
+    mapTab.addEventListener('shown.bs.tab', function () {
+        if (!mapInstance) {
+            var complaints = JSON.parse(document.getElementById('mapComplaintsData').textContent);
+            mapInstance = L.map('map').setView([19.0760, 72.8777], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
+
+            complaints.forEach(function(item) {
+                if (item.status === "Resolved") return;
+
+                var iconUrl = item.status === "In Progress"
+                    ? 'https://maps.google.com/mapfiles/ms/icons/orange-dot.png'
+                    : 'https://maps.google.com/mapfiles/ms/icons/red-dot.png';
+
+                var marker = L.marker([item.latitude, item.longitude], {
+                    icon: L.icon({ iconUrl: iconUrl, iconSize: [32,32] })
+                }).addTo(mapInstance);
+
+                var popupContent = `
+                    <strong>${item.category}</strong><br>
+                    ${item.description}<br>
+                    <small>${item.location_name}</small><br>
+                    <img src="${item.image_url}" width="100">
+                `;
+                marker.bindPopup(popupContent);
+            });
+
+            var legend = L.control({position: 'bottomright'});
+            legend.onAdd = function (map) {
+                var div = L.DomUtil.create('div', 'info legend');
+                div.innerHTML += "<h6>Status Legend</h6>";
+                div.innerHTML += '<i style="background: red; width:12px; height:12px; display:inline-block; margin-right:5px;"></i> Pending<br>';
+                div.innerHTML += '<i style="background: orange; width:12px; height:12px; display:inline-block; margin-right:5px;"></i> In Progress<br>';
+                return div;
+            };
+            legend.addTo(mapInstance);
+
+            setTimeout(() => mapInstance.invalidateSize(), 200);
+        }
+    });
+</script>
+
+
+</body>
+</html>

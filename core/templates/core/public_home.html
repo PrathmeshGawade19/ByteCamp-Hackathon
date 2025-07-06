@@ -1,0 +1,245 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home - Civic Saathi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg shadow-sm" style="background-color: #032f3c">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="{% url 'public_home' %}" style="color: #fff;">Civic Saathi</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="#howitworks" style="color: #fff;">How It Works</a></li>
+        <li class="nav-item"><a class="nav-link" href="#trending" style="color: #fff;">Trending</a></li>
+        <li class="nav-item"><a class="nav-link" href="#testimonials" style="color: #fff;">Testimonials</a></li>
+        <li class="nav-item"><a class="nav-link" href="#about" style="color: #fff;">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="#faq" style="color: #fff;">FAQs</a></li>
+        
+        {% if user.is_authenticated %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}" style="color: #fff;">Dashboard</a></li>
+        {% else %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'login' %}" style="color: #fff;">Login</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+<div class="hero">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Civic Saathi</h1>
+        <p class="lead">Report civic issues in Mumbai and track them until resolved.<br>Let’s keep our city cleaner and safer together!</p>
+        <a href="{% url 'signup' %}" class="btn btn-lg btn-success mt-3 me-2">Get Started</a>
+        <a href="{% url 'login' %}" class="btn btn-lg btn-light mt-3">Login</a>
+    </div>
+</div>
+
+<div class="container my-5" id="howitworks">
+    <h2 class="text-center mb-4">How It Works</h2>
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100 p-3">
+                <div class="mb-3">
+                    <img src="{% static 'core/images/file_complaint.png' %}" alt="File Complaint" width="96"/>
+                </div>
+                <h5>File Complaint</h5>
+                <p class="small text-muted">Submit civic issues like potholes, garbage, water leaks etc. easily with location and photo.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100 p-3">
+                <div class="mb-3">
+                    <img src="{% static 'core/images/discuss_upvote.png' %}" alt="Discuss & Upvote" width="96"/>
+                </div>
+                <h5>Discuss & Upvote</h5>
+                <p class="small text-muted">Citizens can upvote & comment, helping prioritize issues that matter most.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100 p-3">
+                <div class="mb-3">
+                    <img src="{% static 'core/images/authorities_act.png' %}" alt="Authorities Act" width="96"/>
+                </div>
+                <h5>Authorities Act</h5>
+                <p class="small text-muted">Local bodies see top complaints and take action to resolve them faster.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5" id="trending">
+    <h2 class="text-center mb-4">Trending Complaints</h2>
+    <div class="row">
+        {% for complaint in trending_complaints %}
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100 p-3">
+                    <h5 class="mb-2">{{ complaint.category.name }}</h5>
+                    <p class="small text-muted">{{ complaint.description|truncatewords:20 }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">
+                            By {{ complaint.user.username }} • {{ complaint.created_at|date:"M d, Y" }}
+                        </small>
+                        <span>
+                            {% if complaint.status == "Open" %}
+                                <span class="badge bg-danger">Open</span>
+                            {% elif complaint.status == "In Progress" %}
+                                <span class="badge bg-warning text-dark">In Progress</span>
+                            {% elif complaint.status == "Resolved" %}
+                                <span class="badge bg-success">Resolved</span>
+                            {% endif %}
+                        </span>
+                        <span class="badge bg-primary">🔥 {{ complaint.num_upvotes }} upvotes</span>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-center">No trending complaints yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="container my-5" id="testimonials">
+    <h2 class="text-center mb-4">What Citizens Say</h2>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card p-3">
+                <p>"I reported a huge pothole and it was fixed in 4 days. Amazing platform!"</p>
+                <small class="text-muted">— Rajesh, Dadar</small>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card p-3">
+                <p>"It’s so easy to raise civic complaints now. Kudos to Civic Saathi."</p>
+                <small class="text-muted">— Meera, Andheri</small>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card p-3">
+                <p>"Love how we can upvote issues. Community driven change!"</p>
+                <small class="text-muted">— Imran, Borivali</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5" style="max-width: 900px;" id="about">
+    <h2 class="text-center mb-4">About Civic Saathi</h2>
+    <p class="lead text-center">
+        Civic Saathi is a citizen-driven platform designed to bridge the gap between residents and local authorities. 
+        It allows anyone to easily report civic issues such as potholes, garbage dumps, water leaks, and more — right from their smartphone or computer.
+    </p>
+    <p class="text-center">
+        By bringing transparency and community involvement into the process, Civic Saathi helps ensure that the problems affecting neighborhoods are seen and addressed promptly. 
+        Whether you’re filing a complaint, upvoting existing issues, or tracking resolutions, you become an active part of making your city cleaner, safer, and more efficient.
+    </p>
+    <p class="text-center">
+        <div class="text-center my-4">
+            <h5>Be the change. Raise your complaint today!</h5>
+            <a href="{% url 'login' %}" class="btn btn-primary mt-3 px-4 py-2">
+                File a Complaint
+            </a>
+        </div>
+    </p>  
+</div>
+
+<div class="container my-5" id="faq">
+    <h2 class="text-center mb-4">Frequently Asked Questions</h2>
+    <div class="accordion" id="faqAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseOne" aria-expanded="true">
+                    How do I file a complaint?
+                </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    Just sign up, go to your dashboard and click on 'File Complaint' — fill the details and submit!
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseTwo" aria-expanded="false">
+                    Can I track the status of my complaint?
+                </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo">
+                <div class="accordion-body">
+                    Yes, once you file a complaint, you can log in anytime to see its current status — whether it’s Open, In Progress, or Resolved.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingThree">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseThree" aria-expanded="false">
+                    Who can see my complaint?
+                </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree">
+                <div class="accordion-body">
+                    All complaints are publicly visible to other citizens and local authorities. This helps build community pressure and speeds up resolution.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFour">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseFour" aria-expanded="false">
+                    Is there any cost to use Civic Saathi?
+                </button>
+            </h2>
+            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour">
+                <div class="accordion-body">
+                    No, it’s completely free for citizens. Our mission is to empower communities to raise and solve civic issues easily.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFive">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseFive" aria-expanded="false">
+                    What kind of issues can I report here?
+                </button>
+            </h2>
+            <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive">
+                <div class="accordion-body">
+                    You can report potholes, garbage problems, water leaks, streetlight faults, and many more local civic issues that affect daily life.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="py-4 mt-5 border-top" style="background-color: #032f3c; color: #fff;">
+  <div class="container text-center">
+    <p class="mb-1">&copy; 2025 Civic Saathi. All rights reserved.</p>
+    <div>
+      <a href="{% url 'public_home' %}" class="text-decoration-none mx-2" style="color: #fff;">Home</a>
+      <a href="#howitworks" class="text-decoration-none mx-2" style="color: #fff;">How It Works</a>
+      <a href="#about" class="text-decoration-none mx-2" style="color: #fff;">About</a>
+      <a href="#faq" class="text-decoration-none mx-2" style="color: #fff;">FAQs</a>
+      <a href="{% url 'login' %}" class="text-decoration-none mx-2" style="color: #fff;">File Complaint</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
