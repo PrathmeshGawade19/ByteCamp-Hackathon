@@ -39,7 +39,7 @@ This platform bridges that gap, making the complaint process collaborative, tran
 
 ## Technologies Used
 - **Backend:** Django, Python
-- **Frontend:** HTML, CSS (Bootstrap), JavaScript
+- **Frontend:** HTML, CSS , JavaScript, Bootstrap
 - **Database:** MySQL
 - **ML:** scikit-learn for category prediction
 - **Other:** Leaflet.js for maps, Django ORM, Decouple for environment variables
