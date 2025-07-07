@@ -43,7 +43,7 @@ This platform bridges that gap, making the complaint process collaborative, tran
 - **Database:** MySQL
 - **ML:** scikit-learn for category prediction
 - **Other:** Leaflet.js for maps, Django ORM, Decouple for environment variables
-- 
+  
 ---
 
 ## Challenges faced
