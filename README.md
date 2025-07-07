@@ -33,7 +33,7 @@ This platform bridges that gap, making the complaint process collaborative, tran
 
 ## Screenshots
 
-![Website Screenshot](static/core/images/website_preview.png)
+![Website Screenshot](PrathmeshGawade19/ByteCamp-Hackathon/blob/main/core/static/core/images/website_preview.png)
 
 ---
 
